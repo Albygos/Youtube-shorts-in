@@ -8,18 +8,19 @@ def process_video(url, start_time, duration, output_dir):
     download_path = os.path.join(output_dir, f"{job_id}_raw.mp4")
     output_path = os.path.join(output_dir, f"{job_id}_short.mp4")
 
-    # 1. Download video directly to disk
+    # 1. Download video directly to disk using cookies to bypass bot blocks
     ydl_opts = {
         'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4',
         'outtmpl': download_path,
         'quiet': True,
-        'noplaylist': True
+        'noplaylist': True,
+        'cookiefile': 'cookies.txt'  # Reads your YouTube session cookie
     }
     
     with YoutubeDL(ydl_opts) as ydl:
         ydl.extract_info(url, download=True)
 
-    # 2. Pure FFmpeg (Uses <50MB RAM) to crop 9:16 and trim length
+    # 2. Pure FFmpeg to crop 9:16 and trim length (<50MB RAM usage)
     ffmpeg_cmd = [
         "ffmpeg", 
         "-ss", str(start_time),
@@ -28,7 +29,7 @@ def process_video(url, start_time, duration, output_dir):
         "-vf", "crop=ih*(9/16):ih", 
         "-c:v", "libx264",
         "-c:a", "aac",
-        "-threads", "1",  # Restrict threads to keep Render CPU happy
+        "-threads", "1",  # Keeps Render free tier CPU happy
         "-y", 
         output_path
     ]
