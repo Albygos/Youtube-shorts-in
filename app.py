@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request, render_template, send_file, jsonify
+from flask import Flask, request, send_file, jsonify
 from processor import process_video
 
 app = Flask(__name__)
@@ -8,7 +8,8 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    # send_file grabs the HTML directly from the same folder as app.py
+    return send_file('index.html')
 
 @app.route('/convert', methods=['POST'])
 def convert():
